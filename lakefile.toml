@@ -6,12 +6,13 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 linter.oldObtain = true
-linter.refine = true
 linter.style.multiGoal = true
+linter.style.refine = true
 
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
+rev = "v4.19.0"
 
 [[require]]
 name = "checkdecls"

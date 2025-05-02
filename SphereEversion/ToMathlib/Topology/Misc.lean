@@ -129,7 +129,7 @@ theorem Ioo_inter_Iio {α : Type*} [LinearOrder α] {a b c : α} :
 
 theorem fract_lt {x y : ℝ} {n : ℤ} (h1 : (n : ℝ) ≤ x) (h2 : x < n + y) : fract x < y := by
   cases' le_total y 1 with hy hy
-  · rw [← fract_sub_int x n, fract_eq_self.mpr]
+  · rw [← fract_sub_intCast x n, fract_eq_self.mpr]
     · linarith
     · constructor <;> linarith
   · exact (fract_lt_one x).trans_le hy
@@ -139,7 +139,7 @@ theorem one_sub_lt_fract {x y : ℝ} {n : ℤ} (hy : y ≤ 1) (h1 : (n : ℝ) - 
   have I₁ : 1 - y < x - (n - 1) := by linarith
   have I₂ : x - (n - 1) < 1 := by linarith
   norm_cast at I₁ I₂
-  rw [← fract_sub_int x (n - 1), fract_eq_self.mpr]
+  rw [← fract_sub_intCast x (n - 1), fract_eq_self.mpr]
   · exact I₁
   · constructor <;> linarith
 
@@ -152,7 +152,7 @@ theorem IsOpen.preimage_fract' {s : Set ℝ} (hs : IsOpen s) (h2s : 0 ∈ s → 
     specialize h2s H
     rcases fract_eq_zero_iff.mp hx' with ⟨n, rfl⟩; clear hx hx'
     have s_mem_0 := hs.mem_nhds H
-    rcases(nhds_basis_zero_abs_sub_lt ℝ).mem_iff.mp s_mem_0 with ⟨δ, δ_pos, hδ⟩
+    rcases(nhds_basis_zero_abs_lt ℝ).mem_iff.mp s_mem_0 with ⟨δ, δ_pos, hδ⟩
     rcases(nhdsWithin_hasBasis (nhds_basis_Ioo_pos (1 : ℝ)) _).mem_iff.mp h2s with ⟨ε, ε_pos, hε⟩
     rw [Set.Ioo_inter_Iio, min_eq_right (le_add_of_nonneg_right ε_pos.le)] at hε
     set ε' := min ε (1 / 2)
@@ -205,7 +205,7 @@ variable {α β γ δ ι : Type*} [TopologicalSpace α] [TopologicalSpace β] {x
 open scoped Classical in
 theorem isOpen_slice_of_isOpen_over {Ω : Set (α × β)} {x₀ : α}
     (hΩ_op : ∃ U ∈ 𝓝 x₀, IsOpen (Ω ∩ Prod.fst ⁻¹' U)) : IsOpen (Prod.mk x₀ ⁻¹' Ω) := by
-  rcases hΩ_op with ⟨U, hU, hU_op⟩; convert hU_op.preimage (Continuous.Prod.mk x₀) using 1
+  rcases hΩ_op with ⟨U, hU, hU_op⟩; convert hU_op.preimage (Continuous.prodMk_right x₀) using 1
   simp_rw [preimage_inter, preimage_preimage, preimage_const, mem_of_mem_nhds hU, if_pos,
     inter_univ]
 
@@ -213,7 +213,7 @@ end
 
 section projI
 
-variable {α β : Type*} [LinearOrderedSemiring α] {x c : α}
+variable {α β : Type*} [Semiring α] [LinearOrder α] [IsStrictOrderedRing α] {x c : α}
 
 /-- If `α` is a `LinearOrderedSemiring`, then `projI : α → α` projection of `α` onto the unit
 interval `[0, 1]`. -/
@@ -291,7 +291,7 @@ theorem min_projI (h2 : 0 ≤ c) : min c (projI x) = projI (min c x) := by
 theorem continuous_projI [TopologicalSpace α] [OrderTopology α] : Continuous (projI : α → α) :=
   continuous_projIcc.subtype_val
 
-theorem projI_mapsto {α : Type*} [LinearOrderedSemiring α] {s : Set α} (h0s : (0 : α) ∈ s)
+theorem projI_mapsto {s : Set α} (h0s : (0 : α) ∈ s)
     (h1s : (1 : α) ∈ s) : MapsTo projI s s := fun x hx ↦
   (le_total 1 x).elim (fun h2x ↦ by rwa [projI_eq_one.mpr h2x]) fun h2x ↦
     (le_total 0 x).elim (fun h3x ↦ by rwa [projI_eq_self.mpr ⟨h3x, h2x⟩]) fun h3x ↦ by

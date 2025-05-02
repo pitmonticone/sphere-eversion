@@ -286,7 +286,7 @@ private theorem T_nonneg (n : ℕ) : 0 ≤ T n := by
 private theorem not_T_succ_le (n : ℕ) : ¬T (n + 1) ≤ 0 :=
   (T_pos n.succ_ne_zero).not_le
 
-theorem inductive_htpy_construction {X Y : Type*} [TopologicalSpace X] {N : ℕ}
+theorem inductive_htpy_construction' {X Y : Type*} [TopologicalSpace X] {N : ℕ}
     {U K : IndexType N → Set X} (P₀ P₁ : ∀ x : X, Germ (𝓝 x) Y → Prop)
     (P₂ : ∀ p : ℝ × X, Germ (𝓝 p) Y → Prop)
     (hP₂ : ∀ (a b) (p : ℝ × X) (f : ℝ × X → Y), P₂ (a * p.1 + b, p.2) f →
@@ -340,7 +340,7 @@ theorem inductive_htpy_construction {X Y : Type*} [TopologicalSpace X] {N : ℕ}
           have limt : Tendsto (fun t ↦ (2 : ℝ) ^ (i.toNat + 1) * (t - T i.toNat))
               (𝓝 (T i.toNat)) (𝓝 0) :=
             Continuous.tendsto' (by fun_prop) _ _ (by simp)
-          exact limt.prod_map tendsto_id
+          exact limt.prodMap tendsto_id
         filter_upwards [hpast_F'.comp_tendsto lim]
         dsimp [F'']
         rintro ⟨t, x⟩ h'
@@ -404,7 +404,7 @@ theorem inductive_htpy_construction {X Y : Type*} [TopologicalSpace X] {N : ℕ}
       conv => congr; skip; rw [← mul_T_succ_sub i.toNat]
       exact mul_le_mul_of_nonneg_left (sub_le_sub_right (T_lt _).le _) (pow_nonneg zero_le_two _)
     · rintro ⟨t, x⟩ htx
-      simp only [prod_mk_mem_set_prod_eq, mem_Ici, not_and_or, not_le] at htx
+      simp only [prodMk_mem_set_prod_eq, mem_Ici, not_and_or, not_le] at htx
       cases' htx with ht hx
       · change (↑F'' : Germ (𝓝 (t, x)) Y).value = (↑F : Germ (𝓝 (t, x)) Y).value
         rw [loc₁ (t, x) ht.le]
@@ -426,7 +426,7 @@ theorem inductive_htpy_construction {X Y : Type*} [TopologicalSpace X] {N : ℕ}
     exact (h'F j (1, x) rfl hj).self_of_nhds
   · exact fun p ↦ (hF p).2.2
 
-theorem inductive_htpy_construction' {X Y : Type*}
+theorem inductive_htpy_construction {X Y : Type*}
     [EMetricSpace X] [LocallyCompactSpace X] [SecondCountableTopology X]
     (P₀ P₁ : ∀ x : X, Germ (𝓝 x) Y → Prop)
     (P₂ : ∀ p : ℝ × X, Germ (𝓝 p) Y → Prop)
@@ -455,7 +455,7 @@ theorem inductive_htpy_construction' {X Y : Type*}
   rcases exists_locallyFinite_subcover_of_locally isClosed_univ P_anti P_empty
     (by simpa only [mem_univ, forall_true_left] using ind) with
     ⟨K : IndexType 0 → Set X, W : IndexType 0 → Set X, K_cpct, W_op, hW, K_subW, W_fin, K_cover⟩
-  apply inductive_htpy_construction P₀ P₁ P₂ hP₂ W_fin (univ_subset_iff.mp K_cover) init
+  apply inductive_htpy_construction' P₀ P₁ P₂ hP₂ W_fin (univ_subset_iff.mp K_cover) init
     (fun ⟨t, x⟩ ↦  hP₂' t x f₀ (init x))
   intro i f hf₀ hf₁
   obtain ⟨K₁, K₁_cpct, KiK₁, K₁W⟩ : ∃ K₁, IsCompact K₁ ∧ K i ⊆ interior K₁ ∧ K₁ ⊆ W i :=
