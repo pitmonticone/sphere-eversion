@@ -37,7 +37,7 @@ def ContinuousLinearMap.blocks (A : M₁ →L[𝕜] M₃) (B : M₂ →L[𝕜] M
 construct the continuous linear equiv with "matrix"
 A 0
 C D.
-  -/
+-/
 -- TODO: generalise this to larger constructors? or is this useful as-is?
 def ContinuousLinearEquiv.lowerTriangular (A : M₁ ≃L[𝕜] M₃) (C : M₁ →L[𝕜] M₄) (D : M₂ ≃L[𝕜] M₄) :
     (M₁ × M₂) ≃L[𝕜] M₃ × M₄ :=
@@ -78,14 +78,6 @@ variable {𝕜}
 theorem StrictDifferentiableAt.differentiableAt {f : E → F} {x : E}
     (h : StrictDifferentiableAt 𝕜 f x) : DifferentiableAt 𝕜 f x :=
   Exists.elim h fun φ hφ ↦ ⟨φ, hφ.hasFDerivAt⟩
-
--- PR to LinearAlgebra.Prod
-@[simp]
-theorem LinearMap.coprod_comp_inl_inr {R : Type*} {M : Type*} {M₂ : Type*} {M₃ : Type*}
-    [Semiring R] [AddCommMonoid M] [AddCommMonoid M₂] [AddCommMonoid M₃] [Module R M] [Module R M₂]
-    [Module R M₃] (f : M × M₂ →ₗ[R] M₃) :
-    (f.comp (LinearMap.inl R M M₂)).coprod (f.comp (LinearMap.inr R M M₂)) = f := by
-  rw [← LinearMap.comp_coprod, LinearMap.coprod_inl_inr, LinearMap.comp_id]
 
 -- PR to Topology.Algebra.Module.Basic
 @[simp]
@@ -185,7 +177,8 @@ theorem contDiff_parametric_symm [CompleteSpace E] [CompleteSpace F] {f : E → 
       · simp_rw [← hf']
         exact hff.contDiff_top_partial_snd.continuous
   let φ := φ₀.toHomeomorphOfContDiff hderiv
-  exact contDiff_snd.comp (φ.contDiff_symm (fun x ↦ (hderiv x).hasFDerivAt) (contDiff_fst.prodMk hf))
+  exact contDiff_snd.comp (φ.contDiff_symm (fun x ↦ (hderiv x).hasFDerivAt)
+    (contDiff_fst.prodMk hf))
 
 end
 

@@ -210,7 +210,7 @@ theorem FamilyJetSec.curry_φ' (S : FamilyJetSec (P × E) F G) (p : G × P) (x :
   rw [S.curry_φ]
   congr 1
   refine ((differentiableAt_const _).fderiv_prodMk differentiableAt_id).trans ?_
-  rw [fderiv_id, fderiv_const]
+  rw [fderiv_id, fderiv_fun_const]
   rfl
 
 theorem FamilyJetSec.isHolonomicAt_curry (S : FamilyJetSec (P × E) F G) {t : G} {s : P} {x : E}
@@ -247,7 +247,8 @@ theorem curry_eq_iff_eq_uncurry_loc {𝓕 : FamilyFormalSol G (R.relativize P)}
   simp_rw [Prod.ext_iff] at h ⊢
   refine ⟨h.1, ?_⟩
   simp_rw [𝓕.curry_φ', h.2, 𝓕₀.uncurry_φ']
-  change ((D (fun (z : P) ↦ 𝓕₀.toFamilyJetSec.f z x) s).comp (fst ℝ P E) + (𝓕₀.toFamilyJetSec.φ s x).comp (snd ℝ P E)).comp (inr ℝ P E) = ((𝓕₀ s) x).snd
+  change ((D (fun (z : P) ↦ 𝓕₀.toFamilyJetSec.f z x) s).comp (fst ℝ P E)
+    + (𝓕₀.toFamilyJetSec.φ s x).comp (snd ℝ P E)).comp (inr ℝ P E) = ((𝓕₀ s) x).snd
   ext v
   simp_rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.inr_apply, ContinuousLinearMap.coe_fst',

@@ -128,7 +128,7 @@ theorem Ioo_inter_Iio {α : Type*} [LinearOrder α] {a b c : α} :
     Ioo a b ∩ Iio c = Ioo a (min b c) := by ext; simp [and_assoc]
 
 theorem fract_lt {x y : ℝ} {n : ℤ} (h1 : (n : ℝ) ≤ x) (h2 : x < n + y) : fract x < y := by
-  cases' le_total y 1 with hy hy
+  obtain (hy | hy) := le_total y 1
   · rw [← fract_sub_intCast x n, fract_eq_self.mpr]
     · linarith
     · constructor <;> linarith
@@ -164,7 +164,7 @@ theorem IsOpen.preimage_fract' {s : Set ℝ} (hs : IsOpen s) (h2s : 0 ∈ s → 
     have mem : Ioo ((n : ℝ) - ε') (n + δ) ∈ 𝓝 (n : ℝ) := by apply Ioo_mem_nhds <;> linarith
     apply mem_of_superset mem
     rintro x ⟨hx, hx'⟩
-    cases' le_or_gt (n : ℝ) x with hx'' hx''
+    obtain (hx'' | hx'') := le_or_gt (n : ℝ) x
     · apply hδ
       rw [mem_setOf_eq, abs_eq_self.mpr (fract_nonneg x)]
       exact fract_lt hx'' hx'
@@ -285,7 +285,7 @@ theorem projI_eq_min : projI x = min 1 x ↔ 0 ≤ x := by
   simp_rw [projI_def, max_eq_right_iff, le_min_iff, zero_le_one, true_and]
 
 theorem min_projI (h2 : 0 ≤ c) : min c (projI x) = projI (min c x) := by
-  cases' le_total c x with h3 h3 <;> simp [h2, h3, projI_le_iff, projI_eq_min.mpr]
+  obtain (h3 | h3) := le_total c x <;> simp [h2, h3, projI_le_iff, projI_eq_min.mpr]
   simp [projI_eq_min.mpr, h2.trans h3, min_left_comm c, h3]
 
 theorem continuous_projI [TopologicalSpace α] [OrderTopology α] : Continuous (projI : α → α) :=
@@ -297,11 +297,11 @@ theorem projI_mapsto {s : Set α} (h0s : (0 : α) ∈ s)
     (le_total 0 x).elim (fun h3x ↦ by rwa [projI_eq_self.mpr ⟨h3x, h2x⟩]) fun h3x ↦ by
       rwa [projI_eq_zero.mpr h3x]
 
--- about path.truncate
+-- about Path.truncate
 theorem truncate_projI_right {X : Type*} [TopologicalSpace X] {a b : X} (γ : Path a b) (t₀ t₁ : ℝ)
     (s : I) : γ.truncate t₀ (projI t₁) s = γ.truncate t₀ t₁ s := by
-  simp_rw [Path.truncate, Path.coe_mk_mk, Path.extend, IccExtend, Function.comp]
-  rw [min_projI (s.prop.1.trans <| le_max_left _ _), projIcc_projI]
+  simp_rw [Path.truncate, Path.coe_mk_mk, Path.extend, IccExtend, Function.comp_def]
+  rw [min_projI (s.prop.1.trans <| le_max_left _ _), ContinuousMap.coe_mk, projIcc_projI]
 
 end projI
 
@@ -320,13 +320,15 @@ theorem decode₂_locallyFinite {ι} [Encodable ι] {s : ι → Set α} (hs : Lo
   obtain ⟨U, hxU, hU⟩ := hs x
   refine ⟨U, hxU, ?_⟩
   have :
-    encode ⁻¹' {i : ℕ | ((s <$> decode₂ ι i).getD ∅ ∩ U).Nonempty} = {i : ι | (s i ∩ U).Nonempty} := by simp_rw [preimage_setOf_eq, decode₂_encode, map_some, getD_some]
+      encode ⁻¹' {i : ℕ | ((s <$> decode₂ ι i).getD ∅ ∩ U).Nonempty} =
+      {i : ι | (s i ∩ U).Nonempty} := by
+    simp_rw [preimage_setOf_eq, decode₂_encode, map_eq_map, map_some, getD_some]
   rw [← this] at hU
   refine finite_of_finite_preimage hU ?_
   intro n hn
   rw [← decode₂_ne_none_iff]
   intro h
-  simp_rw [mem_setOf_eq, h, map_none, getD_none, empty_inter] at hn
+  simp_rw [mem_setOf_eq, h, map_eq_map, map_none, getD_none, empty_inter] at hn
   exact (not_nonempty_empty hn).elim
 
 variable {X : Type*} [EMetricSpace X] [LocallyCompactSpace X] [SecondCountableTopology X]
@@ -350,23 +352,23 @@ theorem exists_locallyFinite_subcover_of_locally {C : Set X} (hC : IsClosed C) {
   let W' : ℕ → Set X := fun n ↦ (W <$> decode₂ s n).getD ∅
   refine ⟨K', W', ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro n; cases' h : decode₂ s n with i
-    · simp_rw [K', h, map_none, getD_none, isCompact_empty]
-    · simp_rw [K', h, map_some, getD_some]
+    · simp_rw [K', h, map_eq_map, map_none, getD_none, isCompact_empty]
+    · simp_rw [K', h, map_eq_map, map_some, getD_some]
       exact (hcV i).of_isClosed_subset (hK i) ((hKW i).trans <| (hWV i).trans interior_subset)
   · intro n; cases h : decode₂ s n
-    · simp_rw [W', h, map_none, getD_none, isOpen_empty]
-    · simp_rw [W', h, map_some, getD_some, hW]
+    · simp_rw [W', h, map_eq_map, map_none, getD_none, isOpen_empty]
+    · simp_rw [W', h, map_eq_map, map_some, getD_some, hW]
   · intro n; cases' h : decode₂ s n with i
-    · simp_rw [W', h, map_none, getD_none, h0]
-    · simp_rw [W', h, map_some, getD_some]; refine hP ?_ (hPV' i)
+    · simp_rw [W', h, map_eq_map, map_none, getD_none, h0]
+    · simp_rw [W', h, map_eq_map, map_some, getD_some]; refine hP ?_ (hPV' i)
       exact (hWV i).trans (interior_subset.trans <| hVV' i)
   · intro n; cases h : decode₂ s n
-    · simp_rw [K', W', h, map_none]; rfl
-    · simp_rw [K', W', h, map_some, getD_some, hKW]
+    · simp_rw [K', W', h, map_eq_map, map_none]; rfl
+    · simp_rw [K', W', h, map_eq_map, map_some, getD_some, hKW]
   · exact decode₂_locallyFinite hlW
   · intro x hx; obtain ⟨i, hi⟩ := mem_iUnion.mp (hCK hx)
     refine mem_iUnion.mpr ⟨encode i, ?_⟩
-    simp_rw [K', decode₂_encode, map_some, getD_some, hi]
+    simp_rw [K', decode₂_encode, map_eq_map, map_some, getD_some, hi]
 
 end
 

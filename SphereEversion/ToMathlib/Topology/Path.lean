@@ -32,11 +32,9 @@ def strans (γ γ' : Path x x) (t₀ : I) : Path x x where
     · continuity
     · simp only [extend_div_self, Icc.mk_zero, zero_le_one, id, zero_div, forall_eq,
         extend_extends, Path.source, left_mem_Icc, sub_self]
-  source' := by
-    simp only [unitInterval.nonneg', Icc.coe_zero, Icc.mk_zero, zero_le_one, if_true, zero_div,
-      comp_apply, extend_extends, Path.source, left_mem_Icc]
+  source' := by simp
   target' := by
-    simp (config := { contextual := true }) only [unitInterval.le_one'.le_iff_eq.trans eq_comm,
+    simp +contextual only [unitInterval.le_one'.le_iff_eq.trans eq_comm,
       extend_div_self, Icc.coe_one, imp_true_iff, eq_self_iff_true, comp_apply, ite_eq_right_iff]
 
 /-- Reformulate `strans` without using `extend`. This is useful to not have to prove that the
@@ -50,7 +48,8 @@ theorem strans_def {x : X} {t₀ t : I} (γ γ' : Path x x) :
   split_ifs with h <;> simp [strans, h, ← extend_extends]
 
 @[simp]
-theorem strans_of_ge {t t₀ : I} (h : t₀ ≤ t) : γ.strans γ' t₀ t = γ'.extend ((t - t₀) / (1 - t₀)) := by
+theorem strans_of_ge {t t₀ : I} (h : t₀ ≤ t) :
+    γ.strans γ' t₀ t = γ'.extend ((t - t₀) / (1 - t₀)) := by
   simp only [Path.coe_mk_mk, Path.strans, ite_eq_right_iff]
   intro h2; obtain rfl := le_antisymm h h2; simp
 
@@ -60,9 +59,9 @@ theorem unitInterval.zero_le (x : I) : 0 ≤ x :=
 @[simp]
 theorem strans_zero (γ γ' : Path x x) : γ.strans γ' 0 = γ' := by
   ext t
-  simp (config := { contextual := true }) only [strans_of_ge (unitInterval.zero_le t),
-    Icc.coe_zero, div_one, extend_extends', unitInterval.nonneg'.le_iff_eq, sub_zero, div_zero,
-    extend_zero, ite_eq_right_iff, show (t : ℝ) = 0 ↔ t = 0 from (@Subtype.ext_iff _ _ t 0).symm,
+  simp +contextual only [strans_of_ge (unitInterval.zero_le t), Icc.coe_zero, div_one,
+    extend_extends', unitInterval.nonneg'.le_iff_eq, sub_zero, div_zero, extend_zero,
+    ite_eq_right_iff, show (t : ℝ) = 0 ↔ t = 0 from (@Subtype.ext_iff _ _ t 0).symm,
     Path.source, eq_self_iff_true, imp_true_iff]
 
 @[simp]
@@ -122,24 +121,24 @@ theorem Continuous.path_strans {X Y : Type*} [UniformSpace X]
     refine (continuous_subtype_val.comp hs).continuousAt.comp_div_cases (fun x s ↦ (γ x).extend s)
       (continuous_subtype_val.comp ht).continuousAt ?_ ?_
     · intro _
-      refine ContinuousAt.path_extend _ ?_ continuousAt_snd
+      refine ContinuousAt.pathExtend _ ?_ continuousAt_snd
       exact hγ.continuousAt.comp (continuousAt_fst.fst.prodMk continuousAt_snd)
     · intro h
       have ht : t x = 0 := Subtype.ext h
-      apply Filter.Tendsto.path_extend
+      apply Filter.Tendsto.pathExtend
       dsimp only; rw [(projIcc_surjective _).filter_map_top, extend_zero]
       exact tendsto_prod_top_iff.mpr (hγ0 ht)
   · rw [continuous_iff_continuousAt]
     intro x
-    refine ((continuous_subtype_val.comp hs).sub (continuous_subtype_val.comp ht)).continuousAt.comp_div_cases
-      (fun x s ↦ (γ' x).extend s)
+    refine (continuous_subtype_val.comp hs).sub (continuous_subtype_val.comp ht)
+      |>.continuousAt.comp_div_cases (fun x s ↦ (γ' x).extend s)
       (continuous_const.sub <| continuous_subtype_val.comp ht).continuousAt ?_ ?_
     · intro _
-      refine ContinuousAt.path_extend _ ?_ continuousAt_snd
+      refine ContinuousAt.pathExtend _ ?_ continuousAt_snd
       exact hγ'.continuousAt.comp (continuousAt_fst.fst.prodMk continuousAt_snd)
     · intro h
       have ht : t x = 1 := Subtype.ext (sub_eq_zero.mp h).symm
-      apply Filter.Tendsto.path_extend
+      apply Filter.Tendsto.pathExtend
       dsimp only; rw [(projIcc_surjective _).filter_map_top, extend_zero]
       exact tendsto_prod_top_iff.mpr (hγ'1 ht)
   · rintro x h; rw [h, sub_self, zero_div, extend_div_self, extend_zero]

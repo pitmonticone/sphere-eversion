@@ -148,15 +148,15 @@ theorem injOn_rot_of_ne (t : ℝ) {x : E} (hx : x ≠ 0) : Set.InjOn (ω.rot (t,
   simp_rw [← pow_two, norm_smul, mul_pow] at hy
   change _ + _ * ‖x×₃(⟨y, hy'⟩ : (span ℝ {x})ᗮ)‖ ^ 2 = ‖(0 : E)‖ ^ 2 at hy
   rw [norm_crossProduct] at hy
-  simp (config := {decide := true}) only [norm_eq_abs, Even.pow_abs, coe_mk, norm_zero, zero_pow,
-    Ne, Nat.one_ne_zero, not_false_iff] at hy
+  simp +decide only [norm_eq_abs, Even.pow_abs, coe_mk, norm_zero, zero_pow, Ne, Nat.one_ne_zero,
+    not_false_iff] at hy
   change _ + _ * (_ * ‖y‖) ^ 2 = 0 at hy
   rw [mul_pow, ← mul_assoc, ← add_mul, mul_eq_zero, or_iff_not_imp_left] at hy
   have : (0 : ℝ) < cos (t * π) ^ 2 + sin (t * π) ^ 2 * ‖x‖ ^ 2 := by
     have : (0 : ℝ) < ‖x‖ ^ 2 := pow_pos (norm_pos_iff.mpr hx) 2
     rw [cos_sq']
-    rw [show (1 : ℝ) - sin (t * π) ^ 2 + sin (t * π) ^ 2 * ‖x‖ ^ 2 = (1 : ℝ) + sin (t * π) ^ 2 * (‖x‖ ^ 2 - 1)
-    by ring]
+    rw [show (1 : ℝ) - sin (t * π) ^ 2 + sin (t * π) ^ 2 * ‖x‖ ^ 2 =
+      (1 : ℝ) + sin (t * π) ^ 2 * (‖x‖ ^ 2 - 1) by ring]
     have I₂ : sin (t * π) ^ 2 ≤ 1 := sin_sq_le_one (t * π)
     have I₃ : (0 : ℝ) ≤ sin (t * π) ^ 2 := sq_nonneg _
     rcases I₃.eq_or_lt with (H | H)
@@ -171,7 +171,8 @@ theorem injOn_rot_of_ne (t : ℝ) {x : E} (hx : x ≠ 0) : Set.InjOn (ω.rot (t,
     rw [real_inner_comm, this]
     simp
 
-theorem injOn_rot (t : ℝ) (x : Metric.sphere (0 : E) 1) : Set.InjOn (ω.rot (t, x)) (ℝ ∙ (x : E))ᗮ := by
+theorem injOn_rot (t : ℝ) (x : Metric.sphere (0 : E) 1) :
+    Set.InjOn (ω.rot (t, x)) (ℝ ∙ (x : E))ᗮ := by
   intro v hv w hw h
   simpa [sub_eq_zero, h] using (ω.isometry_on_rot t x (⟨v, hv⟩ - ⟨w, hw⟩)).symm
 

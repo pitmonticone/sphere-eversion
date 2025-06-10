@@ -85,7 +85,7 @@ theorem corrugation.support : support (𝒯 N γ) ⊆ Loop.support γ := fun x x
   simp [h]
 
 theorem corrugation_eq_zero (x) (H : x ∉ Loop.support γ) : corrugation π N γ x = 0 :=
-  nmem_support.mp fun hx ↦ H (corrugation.support π N γ hx)
+  notMem_support.mp fun hx ↦ H (corrugation.support π N γ hx)
 
 open intervalIntegral in
 theorem corrugation.c0_small_on [FirstCountableTopology E] [LocallyCompactSpace E]
@@ -106,11 +106,11 @@ theorem corrugation.c0_small_on [FirstCountableTopology E] [LocallyCompactSpace 
     intro N hN x hx t
     rw [corrugation, norm_smul, mul_comm]
     apply (mul_le_mul_of_nonneg_right _ (norm_nonneg <| 1 / N)).trans_lt hN
-    cases' le_or_lt t 0 with ht ht
+    obtain (ht | ht) := le_or_lt t 0
     · rw [h_le x t ht]
       apply hC (0, x)
       simp [hx]
-    · cases' le_or_lt 1 t with ht' ht'
+    · obtain (ht' | ht') := le_or_lt 1 t
       · rw [h_ge x t ht']
         apply hC (1, x)
         simp [hx]

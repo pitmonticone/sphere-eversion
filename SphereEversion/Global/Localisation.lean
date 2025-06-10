@@ -34,11 +34,10 @@ def OneJetSec.loc (F : OneJetSec 𝓘(ℝ, E) E 𝓘(ℝ, E') E') : JetSec E E' 
     rw [contDiff_iff_contDiffAt]
     intro x₀
     have : ContMDiffAt _ _ _ _ _ := F.smooth x₀
-    simp_rw (config := { unfoldPartialApp := true }) [contMDiffAt_oneJetBundle, inTangentCoordinates, inCoordinates,
+    simp_rw +unfoldPartialApp [contMDiffAt_oneJetBundle, inTangentCoordinates, inCoordinates,
       TangentBundle.symmL_model_space, TangentBundle.continuousLinearMapAt_model_space,
-      ContinuousLinearMap.one_def, ContinuousLinearMap.comp_id] at this
-    dsimp only [TangentSpace] at this
-    simp_rw [ContinuousLinearMap.id_comp] at this
+      ContinuousLinearMap.one_def, ContinuousLinearMap.comp_id, TangentSpace,
+      ContinuousLinearMap.id_comp] at this
     exact this.2.2.contDiffAt
 
 theorem OneJetSec.loc_hol_at_iff (F : OneJetSec 𝓘(ℝ, E) E 𝓘(ℝ, E') E') (x : E) :
@@ -177,8 +176,6 @@ theorem FormalSol.transfer_unloc_localize (F : FormalSol R) (hF : range (F.bs �
     (x : E) : p.φ.transfer p.ψ ((F.localize p hF).unloc x) = F (p.φ x) :=
   transfer_localize F.toOneJetSec p.φ p.ψ hF x
 
-open scoped Classical
-
 lemma ChartPair.mkHtpy_aux {F : FormalSol R} {𝓕 : (R.localize p.φ p.ψ).relLoc.HtpyFormalSol}
     (h : p.compat' F 𝓕) (t x) (hx : x ∉ p.K₁) :
     F (p.φ x) = OneJetBundle.embedding p.φ p.ψ (RelLoc.HtpyFormalSol.unloc p 𝓕 t x) := by
@@ -188,8 +185,8 @@ lemma ChartPair.mkHtpy_aux {F : FormalSol R} {𝓕 : (R.localize p.φ p.ψ).relL
 variable [T2Space M]
 
 def ChartPair.mkHtpy (F : FormalSol R) (𝓕 : (R.localize p.φ p.ψ).relLoc.HtpyFormalSol) :
-    HtpyFormalSol R :=
-  if h : p.compat' F 𝓕 then
+    HtpyFormalSol R := by
+  classical exact if h : p.compat' F 𝓕 then
     p.φ.updateFormalSol p.ψ F (𝓕.unloc p) p.hK₁ (p.mkHtpy_aux h)
   else F.constHtpy
 
