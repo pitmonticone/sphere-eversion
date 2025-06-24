@@ -7,8 +7,6 @@ import SphereEversion.Notations
 
 -- set_option trace.filter_inst_type true
 
-attribute [gcongr] nhdsSet_mono
-
 open Set Filter Function
 open scoped Topology unitInterval
 
@@ -282,7 +280,7 @@ private theorem T_nonneg (n : ℕ) : 0 ≤ T n := by
   apply pow_le_one₀ <;> norm_num
 
 private theorem not_T_succ_le (n : ℕ) : ¬T (n + 1) ≤ 0 :=
-  (T_pos n.succ_ne_zero).not_le
+  (T_pos n.succ_ne_zero).not_ge
 
 theorem inductive_htpy_construction' {X Y : Type*} [TopologicalSpace X] {N : ℕ}
     {U K : IndexType N → Set X} (P₀ P₁ : ∀ x : X, Germ (𝓝 x) Y → Prop)
@@ -376,8 +374,7 @@ theorem inductive_htpy_construction' {X Y : Type*} [TopologicalSpace X] {N : ℕ
               (t, x) (↿F') (h₂F' _)
     · intro hi x t ht
       rw [i.toNat_succ hi] at ht ⊢
-      have h₂t : ¬t ≤ T i.toNat := by
-        exact ((T_lt_succ i.toNat).trans_le ht).not_le
+      have h₂t : ¬t ≤ T i.toNat := ((T_lt_succ i.toNat).trans_le ht).not_ge
       dsimp only [F'']
       rw [if_neg h₂t, if_neg]
       · rw [hfutur_F'.self_of_nhdsSet, mul_T_succ_sub]
@@ -385,7 +382,7 @@ theorem inductive_htpy_construction' {X Y : Type*} [TopologicalSpace X] {N : ℕ
           rw [mem_Ici]
           congr
           rw [← mul_T_succ_sub i.toNat]
-        exact mul_le_mul_of_nonneg_left (sub_le_sub_right ht _) (pow_nonneg zero_le_two _)
+        gcongr
       · push_neg
         apply T_lt_succ
     · rintro j hj ⟨t, x⟩ (rfl : t = 1)
@@ -400,7 +397,8 @@ theorem inductive_htpy_construction' {X Y : Type*} [TopologicalSpace X] {N : ℕ
       apply congr_fun (hfutur_F'.self_of_nhdsSet ..)
       rw [mem_Ici]
       conv => congr; skip; rw [← mul_T_succ_sub i.toNat]
-      exact mul_le_mul_of_nonneg_left (sub_le_sub_right (T_lt _).le _) (pow_nonneg zero_le_two _)
+      gcongr
+      exact (T_lt _).le
     · rintro ⟨t, x⟩ htx
       simp only [prodMk_mem_set_prod_eq, mem_Ici, not_and_or, not_le] at htx
       obtain (ht | hx) := htx
