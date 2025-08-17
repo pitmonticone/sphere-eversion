@@ -177,7 +177,7 @@ theorem loc_immersion_rel_ample (n : ℕ) [Fact (dim E = n + 1)] (h : finrank �
   have hφ : InjOn φ (ℝ ∙ x)ᗮ := h_mem hx
   clear h_mem
   let u : E := (InnerProductSpace.toDual ℝ E).symm p.π
-  have u_ne : u ≠ 0 := (InnerProductSpace.toDual ℝ E).symm.apply_ne_zero p.pi_ne_zero
+  have u_ne : u ≠ 0 := EmbeddingLike.map_ne_zero_iff.mpr p.pi_ne_zero
   by_cases H : ker p.π = (ℝ ∙ x)ᗮ
   · have key : ∀ w, EqOn (p.update φ w) φ (ℝ ∙ x)ᗮ := by
       intro w x
@@ -369,12 +369,12 @@ theorem locFormalEversionHolAtOne {t : ℝ} (ht : 3 / 4 < t) {x : E} (hx : smoot
   intro v
   have : (fun x : E ↦ ((1 : ℝ) - 2) • x) = fun x ↦ -x := by ext x; norm_num
   simp [this]
-  obtain ⟨v', hv', v, hv, rfl⟩ := Submodule.exists_add_mem_mem_orthogonal (ℝ ∙ x) v
+  obtain ⟨v', hv', v, hv, rfl⟩ := Submodule.exists_add_mem_mem_orthogonal (K := ℝ ∙ x) v
   simp_rw [ContinuousLinearMap.map_add, ω.rot_one _ hv, ω.rot_eq_of_mem_span (1, x) hv']
   rw [fderiv_fun_neg, fderiv_id']
-  simp only [ContinuousLinearMap.neg_apply, ContinuousLinearMap.coe_id', id_eq,
-    orthogonalProjection_mem_subspace_orthogonalComplement_eq_zero hv, add_zero,
-    orthogonalProjection_eq_self_iff.mpr hv', two_smul, add_sub_add_left_eq_sub]
+  simp only [ContinuousLinearMap.neg_apply, ContinuousLinearMap.coe_id', id_eq, add_zero,
+    starProjection_eq_self_iff.mpr hv', two_smul, add_sub_add_left_eq_sub,
+    (Submodule.starProjection_apply_eq_zero_iff _).mpr hv]
   abel
 
 theorem locFormalEversion_hol :
