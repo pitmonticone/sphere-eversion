@@ -7,7 +7,9 @@ Authors: Patrick Massot
 import Mathlib.Algebra.Ring.Subring.Order
 import Mathlib.Geometry.Manifold.Algebra.SmoothFunctions
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
+import Mathlib.Geometry.Manifold.Notation
 import Mathlib.Order.Filter.Ring
+import Mathlib.Tactic.Cases
 import Mathlib.Topology.Germ
 
 /-!
@@ -173,7 +175,7 @@ def valueₛₗ {F} [AddCommMonoid F] [Module ℝ F] (x : N) :
 variable (I)
 
 protected def ContMDiffAt' {x : M} (φ : Germ (𝓝 x) N) (n : WithTop ℕ∞) : Prop :=
-  Quotient.liftOn' φ (fun f ↦ ContMDiffAt I IG n f x) fun f g h ↦
+  Quotient.liftOn' φ (fun f ↦ CMDiffAt n f x) fun f g h ↦
     propext <| by
       constructor
       all_goals refine fun H ↦ H.congr_of_eventuallyEq ?_
@@ -189,7 +191,7 @@ nonrec def mfderiv {x : M} (φ : Germ (𝓝 x) N) :
     TangentSpace I x →L[ℝ] TangentSpace IG φ.value :=
   @Quotient.hrecOn _ (germSetoid (𝓝 x) N)
     (fun φ : Germ (𝓝 x) N ↦ TangentSpace I x →L[ℝ] TangentSpace IG φ.value) φ
-    (fun f ↦ mfderiv I IG f x) fun _f _g hfg ↦ heq_of_eq (EventuallyEq.mfderiv_eq hfg : _)
+    (fun f ↦ mfderiv% f x) fun _f _g hfg ↦ heq_of_eq (EventuallyEq.mfderiv_eq hfg : _)
 
 variable {I}
 
@@ -211,8 +213,9 @@ protected nonrec theorem ContMDiffAt.smul {x : M} {φ : Germ (𝓝 x) ℝ} {ψ :
 theorem ContMDiffAt.sum {x : M} {ι} {s : Finset ι} {n : ℕ∞} {f : ι → Germ (𝓝 x) F}
     (h : ∀ i ∈ s, (f i).ContMDiffAt I n) : (∑ i ∈ s, f i).ContMDiffAt I n := by
   classical
-  induction' s using Finset.induction_on with φ s hφs hs
-  · rw [Finset.sum_empty]; exact contMDiffAt_const
+  induction s using Finset.induction_on with
+  | empty => rw [Finset.sum_empty]; exact contMDiffAt_const
+  | insert φ s hφs hs =>
   simp only [Finset.mem_insert, forall_eq_or_imp] at h
   rw [Finset.sum_insert hφs]
   exact h.1.add (hs h.2)
@@ -298,9 +301,11 @@ theorem ContMDiffAtProd.sum {x : M₁} {ι} {s : Finset ι} {n : ℕ∞}
     {f : ι → Germ (𝓝 x) (M₂ → F)} (h : ∀ i ∈ s, (f i).ContMDiffAtProd I₁ I₂ n) :
     (∑ i ∈ s, f i).ContMDiffAtProd I₁ I₂ n := by
   classical
-  induction' s using Finset.induction_on with φ s hφs hs
-  · rw [Finset.sum_empty]; intro y
+  induction s using Finset.induction_on with
+  | empty =>
+    rw [Finset.sum_empty]; intro y
     exact contMDiffAt_const (x := (x, y)) (c := (0 : F))
+  | insert φ s hφs hs =>
   simp only [Finset.mem_insert, forall_eq_or_imp] at h
   rw [Finset.sum_insert hφs]
   exact h.1.add (hs h.2)

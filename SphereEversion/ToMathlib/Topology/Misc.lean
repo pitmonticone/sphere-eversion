@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Ring.Periodic
 import Mathlib.Analysis.Normed.Affine.Convex
+import Mathlib.Tactic.Cases
 import Mathlib.Topology.Algebra.Order.Floor
 import Mathlib.Topology.EMetricSpace.Paracompact
 import Mathlib.Topology.ShrinkingLemma
@@ -439,9 +440,9 @@ theorem cover_nat_nhdsWithin' {α} [TopologicalSpace α] [SecondCountableTopolog
 
 end TopologicalSpace
 
-namespace Set
-
 open Subtype
+
+namespace Set
 
 namespace Subtype
 

@@ -53,13 +53,10 @@ theorem strans_of_ge {t t₀ : I} (h : t₀ ≤ t) :
   simp only [Path.coe_mk_mk, Path.strans, ite_eq_right_iff]
   intro h2; obtain rfl := le_antisymm h h2; simp
 
-theorem unitInterval.zero_le (x : I) : 0 ≤ x :=
-  x.prop.1
-
 @[simp]
 theorem strans_zero (γ γ' : Path x x) : γ.strans γ' 0 = γ' := by
   ext t
-  simp +contextual only [strans_of_ge (unitInterval.zero_le t), Icc.coe_zero, div_one,
+  simp +contextual only [strans_of_ge unitInterval.nonneg', Icc.coe_zero, div_one,
     extend_extends', sub_zero]
 
 @[simp]
@@ -80,7 +77,7 @@ theorem subset_range_strans_left {x : X} {γ γ' : Path x x} {t₀ : I} (h : t�
     range γ ⊆ range (γ.strans γ' t₀) := by
   rintro _ ⟨t, rfl⟩
   use t * t₀
-  field_simp [strans, unitInterval.mul_le_right, unitInterval.coe_ne_zero.mpr h]
+  simp [strans, unitInterval.mul_le_right, unitInterval.coe_ne_zero.mpr h]
 
 theorem subset_range_strans_right {x : X} {γ γ' : Path x x} {t₀ : I} (h : t₀ ≠ 1) :
     range γ' ⊆ range (γ.strans γ' t₀) := by

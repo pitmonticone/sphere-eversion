@@ -36,7 +36,6 @@ import SphereEversion.ToMathlib.Analysis.InnerProductSpace.CrossProduct
 import SphereEversion.ToMathlib.Analysis.InnerProductSpace.Dual
 import SphereEversion.ToMathlib.Analysis.InnerProductSpace.Projection.Submodule
 import SphereEversion.ToMathlib.Analysis.InnerProductSpace.Rotation
-import SphereEversion.ToMathlib.Analysis.Normed.Module.FiniteDimension
 import SphereEversion.ToMathlib.Analysis.NormedSpace.Misc
 import SphereEversion.ToMathlib.Analysis.NormedSpace.OperatorNorm.Prod
 import SphereEversion.ToMathlib.Data.Nat.Basic
@@ -46,7 +45,6 @@ import SphereEversion.ToMathlib.Geometry.Manifold.Algebra.SmoothGerm
 import SphereEversion.ToMathlib.Geometry.Manifold.Immersion
 import SphereEversion.ToMathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import SphereEversion.ToMathlib.Geometry.Manifold.Metrizable
-import SphereEversion.ToMathlib.Geometry.Manifold.MiscManifold
 import SphereEversion.ToMathlib.Geometry.Manifold.VectorBundle.Misc
 import SphereEversion.ToMathlib.LinearAlgebra.Basic
 import SphereEversion.ToMathlib.LinearAlgebra.FiniteDimensional

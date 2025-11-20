@@ -1,10 +1,10 @@
 import SphereEversion.InductiveConstructions
 import SphereEversion.Loops.Basic
-import SphereEversion.ToMathlib.Analysis.Normed.Module.FiniteDimension
 import SphereEversion.ToMathlib.ExistsOfConvex
 import SphereEversion.ToMathlib.SmoothBarycentric
 import SphereEversion.ToMathlib.Topology.Path
 import Mathlib.Analysis.Convex.Caratheodory
+import Mathlib.Analysis.Normed.Module.FiniteDimension
 
 /-!
 # Surrounding families of loops
@@ -70,9 +70,9 @@ theorem range_pathThrough_subset (hF : IsPathConnected F) {m : ℕ} {p : Fin (m 
 open Fin.NatCast in -- TODO: fix this
 theorem mem_range_pathThrough' (hF : IsPathConnected F) {m : ℕ} {p : Fin (m + 1) → X}
     (hp : ∀ i, p i ∈ F) {i n : ℕ} (h : i ≤ n) : p i ∈ range (hF.pathThrough hp n) := by
-  induction' h with n _ ih
-  · exact ⟨1, by simp⟩
-  · simp only [pathThrough, Path.trans_range, mem_union, ih, true_or]
+  induction h with
+  | refl => exact ⟨1, by simp⟩
+  | step _ ih => simp only [pathThrough, Path.trans_range, mem_union, ih, true_or]
 
 theorem mem_range_pathThrough (hF : IsPathConnected F) {m : ℕ} {p : Fin (m + 1) → X}
     (hp : ∀ i, p i ∈ F) {i : Fin (m + 1)} : p i ∈ range (hF.pathThrough hp m) := by
@@ -214,7 +214,7 @@ theorem smooth_surrounding [FiniteDimensional ℝ F] {x : F} {p : ι → F} {w :
   have hxp : W' (x, p) ∈ V := by simp [W', V, hp, h.coord_eq_w, h.w_pos]
   have hA : IsOpen A := by
     simp only [A, affineBases_findim ι ℝ F hι]
-    exact isOpen_univ.prod (isOpen_affineIndependent ℝ F)
+    exact isOpen_univ.prod isOpen_setOf_affineIndependent
   have hU₂ : IsOpen U := hW'.isOpen_inter_preimage hA hV
   have hU₃ : U ∈ 𝓝 (x, p) :=
     mem_nhds_iff.mpr ⟨U, le_refl U, hU₂, Set.mem_inter (by simp [hp, A]) (mem_preimage.mpr hxp)⟩
@@ -235,7 +235,7 @@ theorem smooth_surroundingPts [FiniteDimensional ℝ F] {x : F} {p : ι → F} {
         SmoothAt' (uncurry W) yq ∧ SurroundingPts yq.1 yq.2 (W yq.1 yq.2) := by
   refine Exists.imp (fun W hW ↦ ?_) (smooth_surrounding h)
   rw [nhds_prod_eq] at hW ⊢
-  have := (IsOpen.eventually_mem (isOpen_affineIndependent ℝ F) h.indep).prod_inr (𝓝 x)
+  have := (IsOpen.eventually_mem isOpen_setOf_affineIndependent h.indep).prod_inr (𝓝 x)
   filter_upwards [hW, this]; rintro ⟨y, q⟩ ⟨hW, h2W, h3W, hq⟩ h2q
   exact ⟨hW, h2q, h2W, h3W, hq⟩
 
@@ -280,7 +280,7 @@ theorem eventually_surroundingPts_of_tendsto_of_tendsto {l : Filter X} {m : Filt
   have hV' : V ∈ 𝓝 (W' (q, v)) := (isOpen_set_pi finite_univ fun _ _ ↦ isOpen_Ioi).mem_nhds hxp
   have hA : IsOpen A := by
     simp only [A, affineBases_findim ι ℝ F hι]
-    exact isOpen_univ.prod (isOpen_affineIndependent ℝ F)
+    exact isOpen_univ.prod isOpen_setOf_affineIndependent
   have hW' : ContinuousAt W' (q, v) :=
     (smooth_barycentric ι ℝ F hι (n := 0)).continuousOn.continuousAt
       (mem_nhds_iff.mpr ⟨A, Subset.rfl, hA, hqv⟩)

@@ -2,6 +2,7 @@ import Mathlib.Analysis.Normed.Order.Lattice
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
+import Mathlib.Geometry.Manifold.Notation
 import SphereEversion.Indexing
 import SphereEversion.Notations
 import SphereEversion.ToMathlib.Analysis.NormedSpace.Misc
@@ -28,8 +29,8 @@ structure OpenSmoothEmbedding where
   invFun : M' → M
   left_inv' : ∀ {x}, invFun (toFun x) = x
   isOpen_range : IsOpen (range toFun)
-  contMDiff_to : ContMDiff I I' ∞ toFun
-  contMDiffOn_inv : ContMDiffOn I' I ∞ invFun (range toFun)
+  contMDiff_to : CMDiff ∞ toFun
+  contMDiffOn_inv : CMDiff[range toFun] ∞ invFun
 
 attribute [coe] OpenSmoothEmbedding.toFun
 
@@ -59,10 +60,10 @@ theorem right_inv {y : M'} (hy : y ∈ range f) : f (f.invFun y) = y := by
   obtain ⟨x, rfl⟩ := hy;
   rw [f.left_inv]
 
-theorem contMDiffAt_inv {y : M'} (hy : y ∈ range f) : ContMDiffAt I' I ∞ f.invFun y :=
+theorem contMDiffAt_inv {y : M'} (hy : y ∈ range f) : CMDiffAt ∞ f.invFun y :=
   (f.contMDiffOn_inv y hy).contMDiffAt <| f.isOpen_range.mem_nhds hy
 
-theorem contMDiffAt_inv' {x : M} : ContMDiffAt I' I ∞ f.invFun (f x) :=
+theorem contMDiffAt_inv' {x : M} : CMDiffAt ∞ f.invFun (f x) :=
   f.contMDiffAt_inv <| mem_range_self x
 
 theorem leftInverse : Function.LeftInverse f.invFun f :=
@@ -92,7 +93,7 @@ def fderiv (x : M) : TangentSpace I x ≃L[𝕜] TangentSpace I' (f x) :=
     (mem_range_self x)).mdifferentiableWithinAt (mod_cast le_top)).mdifferentiableAt
     (f.isOpenMap.range_mem_nhds x)
   have h₂ : MDifferentiableAt I I' f x := f.contMDiff_to.mdifferentiableAt (mod_cast le_top)
-  ContinuousLinearEquiv.equivOfInverse (mfderiv I I' f x) (mfderiv I' I f.invFun (f x))
+  ContinuousLinearEquiv.equivOfInverse (mfderiv% f x) (mfderiv% f.invFun (f x))
     (by
       intro v
       erw [← ContinuousLinearMap.comp_apply, ← mfderiv_comp x h₁ h₂, f.invFun_comp_coe, mfderiv_id,
@@ -110,19 +111,19 @@ def fderiv (x : M) : TangentSpace I x ≃L[𝕜] TangentSpace I' (f x) :=
 omit [IsManifold I ∞ M] [IsManifold I' ∞ M'] in
 @[simp]
 theorem fderiv_coe (x : M) :
-    (f.fderiv x : TangentSpace I x →L[𝕜] TangentSpace I' (f x)) = mfderiv I I' f x := by ext; rfl
+    (f.fderiv x : TangentSpace I x →L[𝕜] TangentSpace I' (f x)) = mfderiv% f x := by ext; rfl
 
 omit [IsManifold I ∞ M] [IsManifold I' ∞ M'] in
 @[simp]
 theorem fderiv_symm_coe (x : M) :
     ((f.fderiv x).symm : TangentSpace I' (f x) →L[𝕜] TangentSpace I x) =
-      mfderiv I' I f.invFun (f x) := by ext; rfl
+      mfderiv% f.invFun (f x) := by ext; rfl
 
 omit [IsManifold I ∞ M] [IsManifold I' ∞ M'] in
 theorem fderiv_symm_coe' {x : M'} (hx : x ∈ range f) :
     ((f.fderiv (f.invFun x)).symm :
         TangentSpace I' (f (f.invFun x)) →L[𝕜] TangentSpace I (f.invFun x)) =
-      (mfderiv I' I f.invFun x : TangentSpace I' x →L[𝕜] TangentSpace I (f.invFun x)) :=
+      (mfderiv% f.invFun x : TangentSpace I' x →L[𝕜] TangentSpace I (f.invFun x)) :=
   by rw [fderiv_symm_coe, f.right_inv hx]
 
 end
@@ -244,7 +245,7 @@ variable {F H : Type*} (M : Type u) [NormedAddCommGroup F] [NormedSpace ℝ F] [
 
 Note that the input `f` is morally an `OpenSmoothEmbedding` but stated in terms of `ContDiff`
 instead of `ContMDiff`. This is more convenient for our purposes. -/
-def openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
+def openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : OpenPartialHomeomorph F F}
     (hf₁ : f.source = univ) (hf₂ : ContDiff ℝ ∞ f) (hf₃ : ContDiffOn ℝ ∞ f.symm f.target)
     (hf₄ : range f ⊆ IF '' (chartAt H x).target) : OpenSmoothEmbedding 𝓘(ℝ, F) F IF M
     where
@@ -253,9 +254,10 @@ def openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
   left_inv' {y} := by
     obtain ⟨z, hz, hz'⟩ := hf₄ (mem_range_self y)
     have aux : f.symm (IF z) = y := by rw [hz']; exact f.left_inv (hf₁.symm ▸ mem_univ _)
-    simp only [← hz', (chartAt H x).right_inv hz, extChartAt, PartialHomeomorph.extend,
-      PartialEquiv.coe_trans, PartialHomeomorph.invFun_eq_coe, ModelWithCorners.toPartialEquiv_coe,
-      PartialHomeomorph.coe_coe, PartialEquiv.coe_trans_symm, PartialHomeomorph.coe_coe_symm,
+    simp only [← hz', (chartAt H x).right_inv hz, extChartAt, OpenPartialHomeomorph.extend,
+      PartialEquiv.coe_trans, OpenPartialHomeomorph.invFun_eq_coe,
+      ModelWithCorners.toPartialEquiv_coe, OpenPartialHomeomorph.coe_coe,
+      PartialEquiv.coe_trans_symm, OpenPartialHomeomorph.coe_coe_symm,
       ModelWithCorners.left_inv, ModelWithCorners.toPartialEquiv_coe_symm, Function.comp_apply, aux]
   isOpen_range :=
     IsOpenMap.isOpen_range fun u hu ↦ by
@@ -264,14 +266,14 @@ def openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
       on_goal 1 => rw [image_comp]
       refine
         (extChartAt IF x).symm_image_eq_source_inter_preimage ((image_subset_range f u).trans ?_)
-      rw [extChartAt, PartialHomeomorph.extend_target']
+      rw [extChartAt, OpenPartialHomeomorph.extend_target']
       exact hf₄
   contMDiff_to := by
     refine (contMDiffOn_extChartAt_symm x).comp_contMDiff hf₂.contMDiff fun y ↦ ?_
-    rw [extChartAt, PartialHomeomorph.extend_target']
+    rw [extChartAt, OpenPartialHomeomorph.extend_target']
     exact hf₄ (mem_range_self y)
   contMDiffOn_inv := by
-    rw [← PartialHomeomorph.extend_target'] at hf₄
+    rw [← OpenPartialHomeomorph.extend_target'] at hf₄
     have hf' : range ((extChartAt IF x).symm ∘ f) ⊆ extChartAt IF x ⁻¹' f.target := by
       rw [range_comp, ← image_subset_iff, ← f.image_source_eq_target, hf₁, image_univ]
       exact (PartialEquiv.image_symm_image_of_subset_target _ hf₄).subset
@@ -281,13 +283,13 @@ def openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
     exact hf₃.contMDiffOn.comp (contMDiffOn_extChartAt.mono hf'') hf'
 
 @[simp]
-theorem coe_openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
+theorem coe_openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : OpenPartialHomeomorph F F}
     (hf₁ : f.source = univ) (hf₂ : ContDiff ℝ ∞ f) (hf₃ : ContDiffOn ℝ ∞ f.symm f.target)
     (hf₄ : range f ⊆ IF '' (chartAt H x).target) :
     (openSmoothEmbOfDiffeoSubsetChartTarget M IF x hf₁ hf₂ hf₃ hf₄ : F → M) =
       (extChartAt IF x).symm ∘ f := by simp [openSmoothEmbOfDiffeoSubsetChartTarget]
 
-theorem range_openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : PartialHomeomorph F F}
+theorem range_openSmoothEmbOfDiffeoSubsetChartTarget (x : M) {f : OpenPartialHomeomorph F F}
     (hf₁ : f.source = univ) (hf₂ : ContDiff ℝ ∞ f) (hf₃ : ContDiffOn ℝ ∞ f.symm f.target)
     (hf₄ : range f ⊆ IF '' (chartAt H x).target) :
     range (openSmoothEmbOfDiffeoSubsetChartTarget M IF x hf₁ hf₂ hf₃ hf₄) =
@@ -325,7 +327,7 @@ theorem nice_atlas' {ι : Type*} {s : ι → Set M} (s_op : ∀ j, IsOpen <| s j
   have hB : ∀ x, (𝓝 x).HasBasis (p x) (B x) := fun x ↦
     ChartedSpace.nhds_hasBasis_balls_of_open_cov IF x s_op cov
   obtain ⟨t, ht₁, ht₂, ht₃, ht₄⟩ := exists_countable_locallyFinite_cover surjective_id hW₀ hW₁ hB
-  let g : M × ℝ → PartialHomeomorph F F := fun z ↦ diffeomorphToNhd (extChartAt IF z.1 z.1) z.2
+  let g : M × ℝ → OpenPartialHomeomorph F F := fun z ↦ diffeomorphToNhd (extChartAt IF z.1 z.1) z.2
   have hg₁ : ∀ z, (g z).source = univ := by simp [g]
   have hg₂ : ∀ z, ContDiff ℝ ∞ (g z) := by simp [g]
   have hg₃ : ∀ z, ContDiffOn ℝ ∞ (g z).symm (g z).target := by simp [g]
@@ -335,7 +337,7 @@ theorem nice_atlas' {ι : Type*} {s : ι → Set M} (s_op : ∀ j, IsOpen <| s j
   · obtain ⟨⟨x, r⟩, hxr⟩ := z
     obtain ⟨hr : 0 < r, hr' : ball (extChartAt IF x x) r ⊆ _, -⟩ := ht₂ _ hxr
     simp_rw [g, extChartAt]
-    rw [← PartialHomeomorph.extend_target']
+    rw [← OpenPartialHomeomorph.extend_target']
     exact (range_diffeomorphToNhd_subset_ball (extChartAt IF x x) hr).trans hr'
   · obtain ⟨⟨x, r⟩, hxr⟩ := z
     obtain ⟨hr : 0 < r, -, j, hj : B x r ⊆ s j⟩ := ht₂ _ hxr
@@ -423,9 +425,9 @@ open Function
 /-- This is lemma `lem:smooth_updating` in the blueprint. -/
 theorem smooth_update (f : M' → M → N) (g : M' → X → Y) {k : M' → M} {K : Set X}
     (hK : IsClosed (φ '' K)) (hf : ContMDiff (IM'.prod IM) IN ∞ (uncurry f))
-    (hg : ContMDiff (IM'.prod IX) IY ∞ (uncurry g)) (hk : ContMDiff IM' IM ∞ k)
+    (hg : ContMDiff (IM'.prod IX) IY ∞ (uncurry g)) (hk : CMDiff ∞ k)
     (hg' : ∀ y x, x ∉ K → f y (φ x) = ψ (g y x)) :
-    ContMDiff IM' IN ∞ fun x ↦ update φ ψ (f x) (g x) (k x) := by
+    CMDiff ∞ fun x ↦ update φ ψ (f x) (g x) (k x) := by
   have hK' : ∀ x, k x ∉ φ '' K → update φ ψ (f x) (g x) (k x) = f x (k x) := fun x hx ↦
     nice_update_of_eq_outside_compact_aux φ ψ (f x) (g x) (hg' x) hx
   refine contMDiff_of_locally_contMDiffOn fun x ↦ ?_

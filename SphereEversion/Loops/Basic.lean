@@ -86,10 +86,10 @@ theorem add_nat_eq (γ : Loop X) (t : ℝ) : ∀ n : ℕ, γ (t + n) = γ t
   | Nat.succ n => by rw [← γ.add_nat_eq t n, Nat.cast_succ, ← add_assoc, γ.per]
 
 theorem add_int_eq (γ : Loop X) (t : ℝ) (n : ℤ) : γ (t + n) = γ t := by
-  induction' n using Int.induction_on with n hn n hn
-  · norm_cast; rw [add_zero]
-  · rw [← hn, Int.cast_add, ← add_assoc, Int.cast_one, γ.per]
-  · rw [← hn, Int.cast_sub, add_sub, Int.cast_one, ← γ.per, sub_add_cancel]
+  induction n using Int.induction_on with
+  | zero => norm_cast; rw [add_zero]
+  | succ n hn => rw [← hn, Int.cast_add, ← add_assoc, Int.cast_one, γ.per]
+  | pred n hn => rw [← hn, Int.cast_sub, add_sub, Int.cast_one, ← γ.per, sub_add_cancel]
 
 theorem fract_eq (γ : Loop X) : ∀ t, γ (fract t) = γ t := by
   intro t
@@ -200,7 +200,7 @@ theorem range_ofPath {x : X} (γ : Path x x) : range (ofPath γ) = range γ := b
   apply congrArg
   ext t
   by_cases ht1 : t.val = 1
-  · have : t = ⟨1, right_mem_Icc.mpr zero_le_one⟩ := Subtype.ext_val ht1
+  · have : t = ⟨1, right_mem_Icc.mpr zero_le_one⟩ := Subtype.ext ht1
     rw [this]
     norm_cast
     simp only [fract, floor_one, Path.extend_zero, Int.cast_one, sub_self]
