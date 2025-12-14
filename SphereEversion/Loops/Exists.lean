@@ -179,7 +179,7 @@ theorem exist_loops_aux2 [FiniteDimensional ℝ E] (hK : IsCompact K) (hΩ_op : 
     · exact hγ₂.to_sf.t_le_zero_eq_b x (linearReparam s) (linearReparam_nonpos (le_of_lt ht))
     · rw [← Loop.fract_eq, fract_linearReparam_eq_zero, hγ₂.base]
       exact Or.imp le_of_lt le_of_lt hs
-  have h3γ₄ : smooth_on γ₄ U := hb.fst'.contDiffOn.congr h2γ₄
+  have h3γ₄ : ContDiffOn ℝ ∞ γ₄ U := hb.fst'.contDiffOn.congr h2γ₄
   obtain ⟨γ₅, hγ₅, hγ₅₄, hγ₅C⟩ :=
     exists_smooth_and_eqOn hγ₄ hcε₂.fst' (fun x ↦ hε₂) hC ⟨U, hUC, h3γ₄⟩
   let γ : E → ℝ → Loop F := fun x t ↦
@@ -297,9 +297,10 @@ theorem exist_loops [FiniteDimensional ℝ E] (hK : IsCompact K) (hΩ_op : IsOpe
   · intro x t s
     have : ∀ (P : F → Prop) (t), (∀ t ∈ I, P (γ t x s)) → P (γ t x s) := by
       intro P t hP
-      rcases le_total 0 t with (h1t | h1t); rcases le_total t 1 with (h2t | h2t)
-      · exact hP t ⟨h1t, h2t⟩
-      · rw [h2γ x t h2t]; exact hP 1 ⟨zero_le_one, le_rfl⟩
+      rcases le_total 0 t with (h1t | h1t)
+      · rcases le_total t 1 with (h2t | h2t)
+        · exact hP t ⟨h1t, h2t⟩
+        · rw [h2γ x t h2t]; exact hP 1 ⟨zero_le_one, le_rfl⟩
       · rw [h1γ x t h1t]; exact hP 0 ⟨le_rfl, zero_le_one⟩
     refine this (fun y ↦ (x, y) ∈ Ω) t fun t _ht ↦ ?_
     rcases h0χ x with (⟨_hx, h2x⟩ | hx)
