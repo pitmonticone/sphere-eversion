@@ -40,7 +40,7 @@ theorem finite_of_finprod_ne_one {M : Type*} {ι : Sort _} [CommMonoid M] {f : �
   classical
   rw [finprod_def] at h
   contrapose h
-  rw [Classical.not_not, dif_neg h]
+  rw [dif_neg h]
 
 theorem support_finite_of_finsum_eq_of_neZero {M : Type*} {ι : Sort _} [AddCommMonoid M]
     {f : ι → M} {x : M} [NeZero x] (h : ∑ᶠ i, f i = x) : (support f).Finite := by
@@ -68,7 +68,7 @@ theorem finsum_sum_filter {α β M : Type*} [AddCommMonoid M] (f : β → α) (s
   · intro x hx
     rw [mem_support] at hx
     obtain ⟨a, h, -⟩ := Finset.exists_ne_zero_of_sum_ne_zero hx
-    simp at h ⊢
+    simp only [Finset.mem_filter, Finset.coe_image, mem_image, SetLike.mem_coe] at h ⊢
     exact ⟨a, h⟩
 
 theorem sum_mem_reallyConvexHull [IsOrderedRing 𝕜]
